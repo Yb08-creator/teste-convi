@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Confirmações — Festa do Ravi 🤠</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;500;600;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --blue: #7ab8d9;
+    --gold: #f0c040;
+    --text: #4a3728;
+    --green: #5a9e6f;
+    --red: #e74c3c;
+    --cream: #fdf8f0;
+  }
+  body {
+    background: linear-gradient(180deg, #c5e3f5, #daeeff 40%, #f5f8ff 100%);
+    font-family: 'Quicksand', sans-serif;
+    min-height: 100vh;
+    padding: 20px 16px 40px;
+  }
+
+  /* LOCK SCREEN */
+  .lock-screen {
+    position: fixed; inset: 0;
+    background: linear-gradient(180deg, #c5e3f5, #daeeff);
+    z-index: 100;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .lock-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 28px; padding: 40px 28px;
+    max-width: 360px; width: 100%; text-align: center;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+    animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+  .lock-card .lock-icon { font-size: 60px; margin-bottom: 16px; display: block; }
+  .lock-card h2 { font-family: 'Pacifico', cursive; font-size: 26px; color: var(--blue); margin-bottom: 8px; }
+  .lock-card p { font-size: 14px; color: #888; margin-bottom: 22px; line-height: 1.5; }
+  .lock-card input {
+    width: 100%; padding: 14px 18px;
+    border: 2px solid rgba(122,184,217,0.3); border-radius: 14px;
+    font-family: 'Quicksand', sans-serif; font-size: 18px; font-weight: 700;
+    color: var(--text); text-align: center; letter-spacing: 6px;
+    background: rgba(184,217,240,0.08); outline: none; margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
+  .lock-card input:focus { border-color: var(--blue); }
+  .lock-btn {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, #7ab8d9, #5a9ec9);
+    color: white; border: none; border-radius: 50px;
+    font-family: 'Quicksand', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 5px 18px rgba(122,184,217,0.4); transition: all 0.2s;
+  }
+  .lock-btn:hover { transform: translateY(-2px); }
+  .lock-error { color: var(--red); font-size: 13px; margin-top: 10px; font-weight: 600; display: none; }
+
+  /* ADMIN CONTENT */
+  .admin-content { display: none; max-width: 600px; margin: 0 auto; }
+
+  .admin-header {
+    background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+    border-radius: 22px; padding: 22px 20px; margin-bottom: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1); text-align: center;
+  }
+  .admin-header h1 { font-family: 'Pacifico', cursive; font-size: 26px; color: var(--blue); margin-bottom: 4px; }
+  .admin-header p { font-size: 13px; color: #aaa; }
+
+  /* STATS */
+  .stats-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .stat-card {
+    flex: 1; background: rgba(255,255,255,0.85); border-radius: 18px;
+    padding: 16px 10px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  }
+  .stat-card .stat-icon { font-size: 22px; display: block; margin-bottom: 6px; }
+  .stat-card .stat-num { font-family: 'Pacifico', cursive; font-size: 26px; color: var(--blue); display: block; line-height: 1; }
+  .stat-card .stat-label { font-size: 10px; color: #aaa; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+  /* ACTION BUTTONS */
+  .action-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .btn-action {
+    flex: 1; min-width: 120px;
+    padding: 10px 16px; border: none; border-radius: 50px;
+    font-family: 'Quicksand', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
+    justify-content: center; gap: 6px;
+  }
+  .btn-refresh { background: linear-gradient(135deg, #7ab8d9, #5a9ec9); color: white; box-shadow: 0 3px 12px rgba(122,184,217,0.3); }
+  .btn-export { background: linear-gradient(135deg, #a8d5a2, #68b870); color: white; box-shadow: 0 3px 12px rgba(90,158,111,0.3); }
+  .btn-confetti { background: linear-gradient(135deg, #f5d98a, #e8c050); color: #5a3a1a; box-shadow: 0 3px 12px rgba(240,192,64,0.3); }
+
+  /* LIST */
+  .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
+  .list-header h3 { font-family: 'Dancing Script', cursive; font-size: 22px; color: var(--blue); }
+
+  /* CONF ITEM */
+  .conf-item {
+    background: rgba(255,255,255,0.9); backdrop-filter: blur(8px);
+    border-radius: 18px; padding: 16px 18px; margin-bottom: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    animation: slideIn 0.4s ease both;
+    border-left: 4px solid var(--blue);
+    position: relative; overflow: hidden;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+  .conf-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
+  .conf-name { font-size: 16px; font-weight: 700; color: var(--text); }
+  .conf-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .conf-time { font-size: 11px; color: #bbb; font-weight: 500; }
+  .btn-del {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(231,76,60,0.1); border: 1.5px solid rgba(231,76,60,0.2);
+    color: var(--red); font-size: 13px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0;
+  }
+  .btn-del:hover { background: rgba(231,76,60,0.2); transform: scale(1.1); }
+  .conf-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+  .chip-adultos { background: rgba(122,184,217,0.15); color: #5a9ec9; }
+  .chip-adolescentes { background: rgba(240,192,64,0.15); color: #b8860b; }
+  .chip-criancas { background: rgba(168,213,162,0.2); color: #3a7a3a; }
+  .chip-total { background: rgba(90,158,111,0.15); color: var(--green); font-weight: 800; }
+
+  /* NAMES LIST */
+  .conf-names { margin-top: 8px; font-size: 12px; color: #888; display: flex; flex-wrap: wrap; gap: 4px; }
+  .name-tag { background: rgba(122,184,217,0.08); border: 1px solid rgba(122,184,217,0.2); border-radius: 8px; padding: 2px 8px; }
+
+  /* EMPTY */
+  .empty-state { text-align: center; padding: 40px 20px; background: rgba(255,255,255,0.7); border-radius: 18px; }
+  .empty-state span { font-size: 50px; display: block; margin-bottom: 12px; }
+  .empty-state p { color: #aaa; font-size: 15px; }
+
+  /* DANGER */
+  .danger-zone { margin-top: 20px; text-align: center; }
+  .btn-clear {
+    padding: 10px 22px; background: rgba(231,76,60,0.1);
+    color: #c0392b; border: 1.5px solid rgba(231,76,60,0.2);
+    border-radius: 50px; font-family: 'Quicksand', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-clear:hover { background: rgba(231,76,60,0.15); }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 30px; color: #aaa; font-size: 14px; }
+  .spinner { width: 30px; height: 30px; border: 3px solid rgba(122,184,217,0.3); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CONFETTI */
+  .cp { position: fixed; width: 8px; height: 8px; top: -20px; border-radius: 2px; pointer-events: none; z-index: 500; animation: cf 3s ease-in forwards; }
+  @keyframes cf { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: rgba(50,50,50,0.95); color: white; padding: 12px 24px; border-radius: 50px;
+    font-size: 14px; font-weight: 600; z-index: 600; transition: transform 0.3s;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 400px) { .stats-row { flex-wrap: wrap; } .stat-card { min-width: calc(50% - 5px); } }
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-card">
+    <span class="lock-icon">🔐</span>
+    <h2>Área Restrita</h2>
+    <p>Esta página é exclusiva para a família da Ravi!<br>Digite a senha para continuar.</p>
+    <input type="password" id="senhaInput" placeholder="••••••" maxlength="20"
+      onkeydown="if(event.key==='Enter') verificarSenha()">
+    <button class="lock-btn" onclick="verificarSenha()">🤠 Entrar</button>
+    <p class="lock-error" id="lockError">❌ Senha incorreta. Tente novamente!</p>
+  </div>
+</div>
+
+<!-- ADMIN CONTENT -->
+<div class="admin-content" id="adminContent">
+
+  <div class="admin-header">
+    <h1>🎉 Confirmações</h1>
+    <p>Festa do Ravi • 11 de Julho de 2026 • 18h</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-icon">✅</span>
+      <span class="stat-num" id="totalConfs">-</span>
+      <span class="stat-label">Confirmações</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">👥</span>
+      <span class="stat-num" id="totalPessoas">-</span>
+      <span class="stat-label">Pessoas</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">👶</span>
+      <span class="stat-num" id="totalCriancas">-</span>
+      <span class="stat-label">Crianças</span>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="action-row">
+    <button class="btn-action btn-refresh" onclick="loadList()">↻ Atualizar</button>
+    <button class="btn-action btn-export" onclick="exportarExcel()">📊 Exportar Excel</button>
+    <button class="btn-action btn-confetti" onclick="launchConfetti()">🎊 Comemorar!</button>
+  </div>
+
+  <!-- LIST -->
+  <div class="list-header">
+    <h3>Lista de confirmados</h3>
+  </div>
+
+  <div id="listContainer">
+    <div class="loading">
+      <div class="spinner"></div>
+      Carregando confirmações...
+    </div>
+  </div>
+
+  <div class="danger-zone">
+    <button class="btn-clear" onclick="limparLista()">🗑️ Limpar lista inteira (cuidado!)</button>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, setDoc, onSnapshot, orderBy, query }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCdA4RedzUXTbQSDe_E59M5OkoJWqUvnRQ",
+    authDomain: "festa-ravi.firebaseapp.com",
+    projectId: "festa-ravi",
+    storageBucket: "festa-ravi.firebasestorage.app",
+    messagingSenderId: "560466000970",
+    appId: "1:560466000970:web:85ba3265dc3428ac7cbab3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const colRef = collection(db, "confirmacoes");
+
+  // Senha admin
+  const SENHA = 'ravi2026';
+
+  window.verificarSenha = function() {
+    const senha = document.getElementById('senhaInput').value;
+    if (senha === SENHA) {
+      document.getElementById('lockScreen').style.display = 'none';
+      document.getElementById('adminContent').style.display = 'block';
+      loadList();
+    } else {
+      document.getElementById('lockError').style.display = 'block';
+      document.getElementById('senhaInput').value = '';
+      document.getElementById('senhaInput').focus();
+    }
+  };
+
+  window.loadList = async function() {
+    const container = document.getElementById('listContainer');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+
+    let list = [];
+    try {
+      const snap = await getDocs(colRef);
+      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    } catch(e) {
+      console.log('Firebase error', e);
+      // fallback to window.storage
+      try {
+        const result = await window.storage.get('confirmacoes', true);
+        if (result && result.value) list = JSON.parse(result.value);
+      } catch(e2) {}
+    }
+
+    // Ordena mais recentes primeiro
+    list.sort((a,b) => (b._ts||0) - (a._ts||0));
+
+    const totalConfs = list.length;
+    const totalPessoas = list.reduce((s,i) => s + (i.total||0), 0);
+    const totalCriancas = list.reduce((s,i) => s + (i.criancas||0), 0);
+    document.getElementById('totalConfs').textContent = totalConfs;
+    document.getElementById('totalPessoas').textContent = totalPessoas;
+    document.getElementById('totalCriancas').textContent = totalCriancas;
+
+    if (!list.length) {
+      container.innerHTML = `<div class="empty-state"><span>🤠</span><p>Ainda não há confirmações!<br>Compartilhe o convite com os convidados.</p></div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    list.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.className = 'conf-item';
+      div.style.animationDelay = `${idx * 0.05}s`;
+      div.id = 'item-' + (item.id || idx);
+
+      // monta nomes extras
+      const allNames = [
+        ...(item.namesAdultos||[]).map(n=>`<span class="name-tag">👨 ${n}</span>`),
+        ...(item.namesAdolescentes||[]).map(n=>`<span class="name-tag">🧒 ${n}</span>`),
+        ...(item.namesCriancas||[]).map(n=>`<span class="name-tag">👶 ${n}</span>`),
+      ].join('');
+
+      div.innerHTML = `
+        <div class="conf-top">
+          <span class="conf-name">👤 ${item.nome}</span>
+          <div class="conf-right">
+            <span class="conf-time">${item.timestamp||''}</span>
+            <button class="btn-del" title="Excluir" onclick="excluirItem('${item.id||''}', ${idx})">✕</button>
+          </div>
+        </div>
+        <div class="conf-chips">
+          ${item.adultos ? `<span class="chip chip-adultos">👨 ${item.adultos} adulto${item.adultos>1?'s':''}</span>` : ''}
+          ${item.adolescentes ? `<span class="chip chip-adolescentes">🧒 ${item.adolescentes} adolescente${item.adolescentes>1?'s':''}</span>` : ''}
+          ${item.criancas ? `<span class="chip chip-criancas">👶 ${item.criancas} criança${item.criancas>1?'s':''}</span>` : ''}
+          <span class="chip chip-total">Total: ${item.total}</span>
+        </div>
+        ${allNames ? `<div class="conf-names">${allNames}</div>` : ''}
+      `;
+      container.appendChild(div);
+    });
+
+    // guarda lista em memória para export
+    window._currentList = list;
+  };
+
+  window.excluirItem = async function(id, idx) {
+    if (!confirm('Excluir esta confirmação?')) return;
+    try {
+      if (id) await deleteDoc(doc(db, "confirmacoes", id));
+    } catch(e) { console.log(e); }
+
+    // remove visualmente
+    const el = document.getElementById('item-' + (id||idx));
+    if (el) {
+      el.style.transition = 'all 0.3s';
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(40px)';
+      setTimeout(() => { el.remove(); loadList(); }, 300);
+    } else { loadList(); }
+    showToast('🗑️ Confirmação excluída');
+  };
+
+  window.limparLista = async function() {
+    if (!confirm('Tem certeza que deseja APAGAR TODAS as confirmações? Esta ação não pode ser desfeita.')) return;
+    try {
+      const snap = await getDocs(colRef);
+      const dels = snap.docs.map(d => deleteDoc(doc(db, "confirmacoes", d.id)));
+      await Promise.all(dels);
+      // também limpa window.storage
+      try { await window.storage.set('confirmacoes', JSON.stringify([]), true); } catch(e){}
+      loadList();
+      showToast('✅ Lista limpa com sucesso');
+    } catch(e) { alert('Erro ao limpar: ' + e.message); }
+  };
+
+  window.exportarExcel = function() {
+    const list = window._currentList || [];
+    if (!list.length) { showToast('⚠️ Nenhuma confirmação para exportar'); return; }
+
+    // CSV com BOM para Excel reconhecer UTF-8
+    const bom = '\uFEFF';
+    const header = 'Nome,Total,Adultos,Adolescentes,Crianças,Nomes Extras,Data/Hora\n';
+    const rows = list.map(i => {
+      const extras = [
+        ...(i.namesAdultos||[]),
+        ...(i.namesAdolescentes||[]),
+        ...(i.namesCriancas||[])
+      ].join(' | ');
+      return `"${i.nome}",${i.total||0},${i.adultos||0},${i.adolescentes||0},${i.criancas||0},"${extras}","${i.timestamp||''}"`;
+    }).join('\n');
+
+    const blob = new Blob([bom + header + rows], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'confirmacoes_ravi.csv';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('📊 Excel exportado com sucesso!');
+  };
+
+  window.launchConfetti = function() {
+    const cols = ['#7ab8d9','#f0c040','#a8d5a2','#f5a8c0','#b8d9f0','#ffd700'];
+    for (let i = 0; i < 80; i++) {
+      const el = document.createElement('div');
+      el.className = 'cp';
+      el.style.cssText = `left:${Math.random()*100}vw;background:${cols[Math.floor(Math.random()*cols.length)]};animation-delay:${Math.random()*2}s;width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;border-radius:${Math.random()>0.5?'50%':'2px'}`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+  };
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  window.showToast = showToast;
+
+  // Enter na senha
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('lockScreen').style.display !== 'none') {
+      window.verificarSenha();
+    }
+  });
+</script>
+</body>
+</html>
